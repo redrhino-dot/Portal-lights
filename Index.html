@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Home Controls</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body {
+      background: #111317;
+      color: #f3f4f6;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+      user-select: none;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: 0.5px; }
+    #clock { font-size: 1.5rem; font-weight: 500; color: #9ca3af; }
+    #status {
+      text-align: center;
+      min-height: 26px;
+      font-size: 1rem;
+      color: #60a5fa;
+      margin-bottom: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      flex: 1;
+    }
+    button.tile {
+      border: none;
+      border-radius: 20px;
+      font-size: 1.6rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      transition: transform 0.08s ease, opacity 0.15s;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    }
+    button.tile:active { transform: scale(0.96); opacity: 0.85; }
+    .on {
+      background: linear-gradient(145deg, #f59e0b, #d97706);
+      color: #111317;
+    }
+    .off {
+      background: linear-gradient(145deg, #272b33, #1e2128);
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+    .heat {
+      background: linear-gradient(145deg, #ef4444, #b91c1c);
+      color: #ffffff;
+    }
+    .icon { font-size: 2.8rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Home Controls</h1>
+    <div id="clock">--:--</div>
+  </header>
+
+  <div id="status">Ready</div>
+
+  <div class="grid">
+    <button class="tile on" onclick="trigger('all-on-cxmng', 'All On')">
+      <span class="icon">💡</span>All On
+    </button>
+    <button class="tile off" onclick="trigger('all-off-kcnbg', 'All Off')">
+      <span class="icon">🌑</span>All Off
+    </button>
+    <button class="tile heat" onclick="trigger('boost-heat-phecq', 'Boost Heat')">
+      <span class="icon">🔥</span>Boost Heat
+    </button>
+  </div>
+
+  <script>
+    const TOKEN = '3d9b3-3289c-ba694-1d369-1bb33-f2112-9f-5780509a-5203-401d-8591-d00f0401f623';
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent =
+        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    async function trigger(deviceId, label) {
+      const status = document.getElementById('status');
+      status.textContent = 'Sending: ' + label + '...';
+
+      const url = 'https://api-v3.voicemonkey.io/trigger?token=' +
+        encodeURIComponent(TOKEN) + '&device=' + encodeURIComponent(deviceId);
+
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          status.textContent = 'Done: ' + label;
+        } else {
+          status.textContent = 'Error (' + res.status + ') - check Alexa routine';
+        }
+      } catch (e) {
+        // Fallback if Portal's browser blocks cross-origin fetch responses
+        const img = new Image();
+        img.src = url;
+        status.textContent = 'Sent: ' + label;
+      }
+    }
+  </script>
+</body>
+</html>
